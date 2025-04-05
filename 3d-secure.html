@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Тест 3D-Secure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" type="image/png"
+        href="https://upload.wikimedia.org/wikipedia/commons/3/39/Cloudpayments-logo.png" />
+</head>
+
+<body class="bg-gray-50 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden form-container mb-8">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Тест 3D-Secure CloudPayments</h1>
+                </div>
+
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+                    <p class="font-medium text-blue-800">
+                        Введите значения <code>PaReq</code> и <code>MD</code> и нажмите кнопку ниже для отправки
+                        POST-запроса.
+                        <br />
+                        <span class="text-sm text-gray-600">Оба поля обязательны для заполнения.</span>
+                    </p>
+                </div>
+
+                <form name="downloadForm" action="https://acs.cloudpayments.ru/test" method="POST" target="_blank"
+                    onsubmit="return validateForm()">
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">PaReq</label>
+                        <textarea id="PaReq" name="PaReq" rows="4"
+                            class="w-full p-3 border rounded-md font-mono text-sm bg-gray-50 resize-y"
+                            placeholder="Вставьте значение PaReq..."></textarea>
+                        <p id="errorPaReq" class="text-red-600 text-sm mt-1 hidden">Поле PaReq обязательно для
+                            заполнения.</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">MD</label>
+                        <input id="MD" type="text" name="MD"
+                            class="w-full p-3 border rounded-md font-mono text-sm bg-gray-50"
+                            placeholder="Вставьте значение MD..." />
+                        <p id="errorMD" class="text-red-600 text-sm mt-1 hidden">Поле MD обязательно для заполнения.</p>
+                    </div>
+
+                    <input type="hidden" name="TermUrl"
+                        value="https://lingering-resonance-77ae.amirkharisov545.workers.dev" />
+
+                    <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Отправить на CloudPayments
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateForm() {
+            const paReq = document.getElementById('PaReq');
+            const md = document.getElementById('MD');
+            const errorPaReq = document.getElementById('errorPaReq');
+            const errorMD = document.getElementById('errorMD');
+
+            let isValid = true;
+
+            if (!paReq.value.trim()) {
+                paReq.classList.add('border-red-500');
+                errorPaReq.classList.remove('hidden');
+                isValid = false;
+            } else {
+                paReq.classList.remove('border-red-500');
+                errorPaReq.classList.add('hidden');
+            }
+
+            if (!md.value.trim()) {
+                md.classList.add('border-red-500');
+                errorMD.classList.remove('hidden');
+                isValid = false;
+            } else {
+                md.classList.remove('border-red-500');
+                errorMD.classList.add('hidden');
+            }
+
+            return isValid;
+        }
+    </script>
+</body>
+
+</html>

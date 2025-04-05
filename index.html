@@ -11,8 +11,19 @@
 
 <body class="bg-gray-50 min-h-screen p-6">
     <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-2xl mx-auto mt-8">
+        <div class="flex items-center justify-between mb-3">
+            <h1 class="text-2xl font-bold text-blue-800">Перейти в:</h1>
+        </div>
+        <button onclick="window.location.href='checkout.html'"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition mr-2">Формирование
+            криптограммы</button>
+        <button onclick="window.location.href='3d-secure.html'"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">3D-Secure</button>
+    </div>
+
+    <div id="dataContainer" class="bg-white shadow-lg rounded-xl p-8 w-full max-w-2xl mx-auto mt-8 hidden">
         <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl font-bold text-blue-800">Данные платежа</h1>
+            <h1 class="text-2xl font-bold text-blue-800">Полученные данные:</h1>
         </div>
 
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
@@ -24,10 +35,6 @@
 
         <button id="copyBtn" onclick="copyData()"
             class="mt-4 inline-flex items-center bg-blue-500 text-white font-medium px-5 py-2 rounded-lg transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                    d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zM6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-            </svg>
             <span id="copyText">Скопировать</span>
         </button>
     </div>
@@ -42,6 +49,11 @@
         const dataText = JSON.stringify(params, null, 2);
         const dataElement = document.getElementById("urlData");
         dataElement.textContent = dataText;
+
+        // Показываем блок с данными только если есть параметры в URL
+        if (Object.keys(params).length > 0) {
+            document.getElementById('dataContainer').classList.remove('hidden');
+        }
 
         function copyData() {
             const btn = document.getElementById("copyBtn");

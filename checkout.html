@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Криптограмма</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" type="image/png"
+        href="https://upload.wikimedia.org/wikipedia/commons/3/39/Cloudpayments-logo.png" />
+    <style>
+        .card-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .card-table th,
+        .card-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .card-table th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .card-table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .selected-card {
+            background-color: #e0f2fe !important;
+        }
+
+        .copy-btn.copied {
+            background-color: #10b981 !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 p-6">
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">Тестовые карты CloudPayments</h1>
+
+            <div id="selected-card-info" class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+                <p class="font-medium text-blue-800">Выбрана следующая карта: <span id="current-card-id"
+                        class="font-bold">-</span></p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="card-table" id="cards-table">
+                    <thead>
+                        <tr>
+                            <th class="w-12">ID</th>
+                            <th>Тип карты</th>
+                            <th>Номер карты</th>
+                            <th>Результат оплаты</th>
+                            <th>Результат оплаты по токену</th>
+                            <th class="w-32">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cards-body">
+                        <!-- Карты будут загружены скриптом -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-8 bg-gray-50 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Генерация криптограммы</h2>
+                <div class="flex items-center space-x-4 mb-4">
+                    <button onclick="generateCryptogram()"
+                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition">
+                        Сгенерировать криптограмму
+                    </button>
+                    <button id="copy-btn" onclick="copyCryptogram()"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-medium transition">
+                        Копировать
+                    </button>
+                </div>
+                <div id="cryptogram-result"
+                    class="bg-white border border-gray-200 p-4 rounded-lg font-mono text-sm overflow-x-auto hidden">
+                    <p>Здесь появится криптограмма после генерации</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://checkout.cloudpayments.ru/checkout.js"></script>
+    <script>
+        // Тестовые карты с сайта CloudPayments
+        const testCards = [
+            { id: 1, type: "Карта Visa с 3-D Secure", number: "4242 4242 4242 4242", result: "Успешный результат", tokenResult: "Успешный результат" },
+            { id: 2, type: "Карта Mastercard с 3-D Secure", number: "5555 5555 5555 4444", result: "Успешный результат", tokenResult: "Успешный результат" },
+            { id: 3, type: "Карта МИР с 3-D Secure", number: "2200 0000 0000 0004", result: "Успешный результат", tokenResult: "Успешный результат" },
+            { id: 4, type: "Карта Visa с 3-D Secure", number: "4012 8888 8888 1881", result: "Недостаточно средств на карте", tokenResult: "-" },
+            { id: 5, type: "Карта Mastercard с 3-D Secure", number: "5105 1051 0510 5100", result: "Недостаточно средств на карте", tokenResult: "-" },
+            { id: 6, type: "Карта МИР с 3-D Secure", number: "2202 2022 0220 2200", result: "Недостаточно средств на карте", tokenResult: "-" },
+            { id: 7, type: "Карта Visa без 3-D Secure", number: "4000 0000 0000 3055", result: "Успешный результат", tokenResult: "Успешный результат" },
+            { id: 8, type: "Карта Mastercard без 3-D Secure", number: "5205 0000 0000 3055", result: "Успешный результат", tokenResult: "Успешный результат" },
+            { id: 9, type: "Карта МИР без 3-D Secure", number: "2202 0000 0000 3055", result: "Успешный результат", tokenResult: "Успешный результат" },
+            { id: 10, type: "Карта Visa без 3-D Secure", number: "4111 1111 1111 1111", result: "Успешный результат", tokenResult: "Недостаточно средств на карте" },
+            { id: 11, type: "Карта Mastercard без 3-D Secure", number: "5200 8282 8282 8210", result: "Успешный результат", tokenResult: "Недостаточно средств на карте" },
+            { id: 12, type: "Карта МИР без 3-D Secure", number: "2200 0000 2222 2222", result: "Успешный результат", tokenResult: "Недостаточно средств на карте" },
+            { id: 13, type: "Карта Visa без 3-D Secure", number: "4000 0566 5566 5556", result: "Недостаточно средств на карте", tokenResult: "-" },
+            { id: 14, type: "Карта Mastercard без 3-D Secure", number: "5404 0000 0000 0043", result: "Недостаточно средств на карте", tokenResult: "-" },
+            { id: 15, type: "Карта МИР без 3-D Secure", number: "2203 0000 0000 0043", result: "Недостаточно средств на карте", tokenResult: "-" }
+        ];
+
+        let selectedCard = null;
+        let currentCryptogram = null;
+        const copyBtn = document.getElementById('copy-btn');
+
+        // Заполняем таблицу картами
+        function loadCards() {
+            const tbody = document.getElementById('cards-body');
+
+            testCards.forEach(card => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${card.id}</td>
+                    <td>${card.type}</td>
+                    <td>${card.number}</td>
+                    <td class="${card.result.includes('Успешный') ? 'text-green-600' : 'text-red-600'}">${card.result}</td>
+                    <td class="${card.tokenResult.includes('Успешный') ? 'text-green-600' : card.tokenResult === '-' ? '' : 'text-red-600'}">${card.tokenResult}</td>
+                    <td><button onclick="selectCard(${card.id}, '${card.number}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">Выбрать</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Выбираем карту
+        function selectCard(id, cardNumber) {
+            selectedCard = {
+                id,
+                cardNumber,
+                expDateMonth: '12',
+                expDateYear: '30',
+                cvv: '123'
+            };
+
+            // Сбрасываем состояние кнопки копирования
+            copyBtn.textContent = 'Копировать';
+            copyBtn.classList.remove('copied');
+
+            document.getElementById('current-card-id').textContent = cardNumber;
+
+            document.querySelectorAll('#cards-body tr').forEach(row => {
+                row.classList.remove('selected-card');
+                if (row.cells[0].textContent == id) {
+                    row.classList.add('selected-card');
+                }
+            });
+        }
+
+        // Генерируем криптограмму
+        function generateCryptogram() {
+            if (!selectedCard) {
+                alert('Пожалуйста, выберите карту из таблицы');
+                return;
+            }
+
+            const checkout = new cp.Checkout({
+                publicId: 'pk_b9cea9e10438e90910279fea9c6c5',
+            });
+
+            const fieldValues = {
+                cvv: selectedCard.cvv,
+                cardNumber: selectedCard.cardNumber,
+                expDateMonth: selectedCard.expDateMonth,
+                expDateYear: selectedCard.expDateYear,
+            }
+
+            const cryptogramElement = document.getElementById('cryptogram-result');
+            cryptogramElement.classList.remove('hidden');
+            cryptogramElement.innerHTML = '<p class="text-gray-600">Генерация криптограммы...</p>';
+
+            checkout.createPaymentCryptogram(fieldValues)
+                .then((cryptogram) => {
+                    currentCryptogram = cryptogram;
+                    cryptogramElement.innerHTML = `
+                        <p class="text-green-600 font-semibold mb-2">Криптограмма успешно сгенерирована:</p>
+                        <div class="bg-gray-100 p-3 rounded break-all">${cryptogram}</div>
+                        <p class="mt-2 text-gray-600">Карта: ${selectedCard.cardNumber}</p>
+                    `;
+                }).catch((errors) => {
+                    currentCryptogram = null;
+                    cryptogramElement.innerHTML = `
+                        <p class="text-red-600 font-semibold">Ошибка при генерации криптограммы:</p>
+                        <p class="mt-1">${errors.message || 'Неизвестная ошибка'}</p>
+                    `;
+                });
+        }
+
+        // Копируем криптограмму
+        function copyCryptogram() {
+            if (!currentCryptogram) {
+                alert('Сначала сгенерируйте криптограмму');
+                return;
+            }
+
+            navigator.clipboard.writeText(currentCryptogram).then(() => {
+                copyBtn.textContent = 'Скопировано!';
+                copyBtn.classList.add('copied');
+
+                // Через 3 секунды возвращаем исходный текст кнопки
+                setTimeout(() => {
+                    if (copyBtn.textContent === 'Скопировано!') {
+                        copyBtn.textContent = 'Копировать';
+                        copyBtn.classList.remove('copied');
+                    }
+                }, 3000);
+            }).catch(err => {
+                console.error('Ошибка при копировании: ', err);
+                alert('Не удалось скопировать криптограмму');
+            });
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCards();
+        });
+    </script>
+</body>
+
+</html>
