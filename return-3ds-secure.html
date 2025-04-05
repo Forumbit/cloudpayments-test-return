@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Данные платежа</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Данные платежа</h1>
+    <p>Вот параметры, переданные в URL:</p>
+
+    <pre id="urlData">Загрузка данных...</pre>
+
+    <button onclick="copyData()">Скопировать</button>
+
+    <script>
+        // Парсим параметры URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const params = {};
+
+        // Собираем все параметры в объект
+        urlParams.forEach((value, key) => {
+            params[key] = value;
+        });
+
+        // Выводим в формате JSON
+        const dataText = JSON.stringify(params, null, 2);
+        document.getElementById("urlData").textContent = dataText;
+
+        // Копирование в буфер обмена
+        function copyData() {
+            navigator.clipboard.writeText(dataText)
+                .then(() => alert("Данные скопированы!"))
+                .catch(() => alert("Ошибка копирования!"));
+        }
+    </script>
+</body>
+
+</html>
